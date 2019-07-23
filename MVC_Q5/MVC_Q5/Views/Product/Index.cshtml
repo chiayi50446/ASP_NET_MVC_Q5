@@ -1,0 +1,130 @@
+﻿@model MVC_Q5.ViewModels.ProductViewModel
+@using PagedList.Mvc;
+@{
+    ViewBag.Title = "Index";
+    IEnumerable<SelectListItem> defaultLocaleItem = ViewBag.DefaultLocale;
+}
+
+
+<h2>Index</h2>
+<div class="l_margin r_margin">
+    <div class="tab_box">
+        <div class="tab_container">
+            <div id="tab1">
+                <div class="layout07">
+                    @using (Html.BeginForm("Index", "Product", FormMethod.Post, new { id = "ProductList" }))
+                    {
+                        @Html.ValidationSummary(true)
+                        @Html.AntiForgeryToken()
+
+                        <ul class="table10 box03" style="display:inline;">
+                            <li style="display:inline; padding-right: 20px;">
+                                <span>Locale :</span>
+                                <span>
+                                    <span class="selectlabel">
+                                        @Html.DropDownListFor(model => model.InputModel.Locale, defaultLocaleItem)
+                                    </span>
+                                </span>
+                            </li>
+                            <li style="display:inline; padding-right: 20px;">
+                                <span>ProductName :</span>
+                                <span>
+                                    @Html.TextBoxFor(model => model.InputModel.Product_Name)
+                                </span>
+                            </li>
+                            <li style="display:inline; padding-right: 20px;">
+                                <span>Price :</span>
+                                <span>
+                                    @Html.TextBoxFor(model => model.InputModel.Price, new { placeholder = "Min ~ Max" })
+                                </span>
+                            </li>
+                        </ul>
+                        <div class="button_area align_c" style="display:inline;">
+                            <button type="submit" class="button02">Search</button>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="tableContainer">
+    <table cellspacing="0" cellpadding="0" class="table03">
+        <thead>
+            <tr>
+                <td> ID </td>
+                <td> Locale </td>
+                <td> Product Name </td>
+                <td> Price </td>
+                <td> Create Date </td>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                foreach (var data in Model.ProductList)
+                {
+                    <tr>
+                        <td>@data.Id</td>
+                        <td>@data.Locale</td>
+                        <td>@data.Product_Name</td>
+                        <td>@CurrencyConversion(@data.Price, @data.Locale)</td>
+                        <td>@data.Create_Date</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+    @Html.PagedListPager(Model.ProductList, page => Url.Action("Index", new { page }), PagedListRenderOptions.ClassicPlusFirstAndLast)
+</div>
+@helper CurrencyConversion(double price, string locale)
+{
+    string result = "-";
+    string cultureName = "";
+    switch (locale)
+    {
+        case "US":
+            cultureName = "en-US";
+            break;
+        case "DE":
+            cultureName = "de-DE";
+            break;
+        case "CA":
+            cultureName = "en-CA";
+            break;
+        case "ES":
+            cultureName = "es-ES";
+            break;
+        case "FR":
+            cultureName = "fr-FR";
+            break;
+        case "JP":
+            cultureName = "ja-JP";
+            break;
+        default:
+            cultureName = "-";
+            break;
+    }
+    result = price.ToString("C", new System.Globalization.CultureInfo(cultureName));
+    <text>@result</text>
+}
+@section scripts
+{
+    <script type="text/javascript">
+        $(function () {
+            $('.pagination>li>a[href]').each(function (i, item) {
+                var page = $(item).attr('href').replace('/Product?page=', '');
+                $(item).attr('href', '#').click(function () { postPage(page); });
+
+            });
+        });
+
+        function postPage(page) {
+            var targetFormId = '#ProductList';
+            $('<input>')
+                .attr({ type: 'hidden', id: 'page', name: 'page', value: page })
+                .appendTo($(targetFormId));
+            $(targetFormId).submit();
+        };
+    </script>
+
+}
