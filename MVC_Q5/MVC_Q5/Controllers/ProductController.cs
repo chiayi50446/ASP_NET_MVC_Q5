@@ -50,7 +50,7 @@ namespace MVC_Q5.Controllers
             }
             if (!String.IsNullOrEmpty(inputModel.Product_Name))
             {
-                result = result.Where(x => x.Product_Name.Contains(inputModel.Product_Name)).ToList();
+                result = result.Where(x => x.Product_Name.ToLower().Contains(inputModel.Product_Name.ToLower())).ToList();
             }
             if (!String.IsNullOrEmpty(inputModel.Price))
             {
